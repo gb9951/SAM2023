@@ -11,8 +11,7 @@ import java.util.Set;
 
 @Entity
 public class Paper extends BaseEntity {
-    String title;
-
+    private String title;
     private PaperFormat format;
     private int version;
     private boolean isReviewed;
