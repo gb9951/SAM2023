@@ -4,12 +4,77 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Assign Papers</title>
+    <style>
+        .collapsible {
+            background-color: #777;
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #555;
+        }
+
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f1f1f1;
+        }
+        </style>
+    </style>
+    <script>
+        window.addEventListener("load", function(event) {
+            let coll = document.getElementsByClassName("collapsible");
+
+            Array.prototype.forEach.call(coll, function(element) {
+                console.log(element)
+                element.addEventListener("click", collapse)
+            });
+        });
+
+        function collapse() {
+            let coll = document.getElementsByClassName("collapsible");
+            console.log("Clicked!")
+            this.classList.toggle("active");
+            let content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                Array.prototype.forEach.call(coll, function(element) {
+                    element.nextElementSibling.style.display = "none";
+                });
+                content.style.display = "block";
+            }
+        }
+    </script>
 </head>
 <body>
-<p>Howdy</p>
-<ul th:each="word : ${words}">
-    <p>Yeehaw</p>
-    <a th:text="${word}"></a>
-</ul>
+<h1>Assign a Paper</h1>
+    <ul>
+        <li th:each="paper : ${papers}">
+            <div class="collapsible">
+                <p th:text="${paper.getTitle()}"></p>
+                <p th:text="'Authored by: ' + ${#strings.listJoin(paper.getAuthors().![name], ', ')}"></p>
+            </div>
+            <div class="content">
+                <p th:if="${not #lists.isEmpty(paper.getAssignedTo)}" th:text="'Assined PCMs: ' + ${#strings.listJoin(paper.getAssignedTo.![name], ', ')}"></p>
+                <form method="post" th:action="@{/assignPaper}" action="/assignPaper">
+                    <select th:name="ids">
+                        <option value="" selected>None</option>
+                        <option th:each="pcm : ${paper.getSelectedNotAssigned()}" th:value="${paper.getId()} + ' ' + ${pcm.getId()}" th:text="${pcm.getName()}"></option>
+                    </select>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+
+        </li>
+    </ul>
 </body>
 </html>

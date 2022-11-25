@@ -63,4 +63,26 @@ public class Paper extends BaseEntity {
     public void setAssignedTo(Set<PCM> assignedTo) {
         this.assignedTo = assignedTo;
     }
+
+    public String getAuthorsString() {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for(Author author: authors) {
+            sb.append(author.getName());
+            if(count < authors.size() -1) {
+                sb.append(",");
+            }
+        }
+        return sb.toString();
+    }
+
+    public Set<PCM> getSelectedNotAssigned() {
+        Set<PCM> selectedNotAssigned = new HashSet<>();
+        for(PCM pcm : selectedBy) {
+            if(!assignedTo.contains(pcm)) {
+                selectedNotAssigned.add(pcm);
+            }
+        }
+        return selectedNotAssigned;
+    }
 }
