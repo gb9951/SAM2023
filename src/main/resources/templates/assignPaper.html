@@ -57,6 +57,7 @@
 </head>
 <body>
 <h1>Assign a Paper</h1>
+    <p th:if="${#lists.isEmpty(papers)}">There are no papers to assign</p>
     <ul>
         <li th:each="paper : ${papers}">
             <div class="collapsible">
@@ -65,15 +66,16 @@
             </div>
             <div class="content">
                 <p th:if="${not #lists.isEmpty(paper.getAssignedTo)}" th:text="'Assined PCMs: ' + ${#strings.listJoin(paper.getAssignedTo.![name], ', ')}"></p>
-                <form method="post" th:action="@{/assignPaper}" action="/assignPaper">
-                    <select th:name="ids">
-                        <option value="" selected>None</option>
-                        <option th:each="pcm : ${paper.getSelectedNotAssigned()}" th:value="${paper.getId()} + ' ' + ${pcm.getId()}" th:text="${pcm.getName()}"></option>
-                    </select>
-                    <input type="submit" value="Submit">
-                </form>
+                <div th:if="${not #lists.isEmpty(paper.getSelectedNotAssigned())}">
+                    <form method="post" th:action="@{/assignPaper}" action="/assignPaper">
+                        <select th:name="ids">
+                            <option th:each="pcm : ${paper.getSelectedNotAssigned()}" th:value="${paper.getId()} + ' ' + ${pcm.getId()}" th:text="${pcm.getName()}"></option>
+                        </select>
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <p th:if="${#lists.isEmpty(paper.getSelectedNotAssigned())}">No PCMs have selected this paper</p>
             </div>
-
         </li>
     </ul>
 </body>

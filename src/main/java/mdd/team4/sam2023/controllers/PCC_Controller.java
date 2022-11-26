@@ -37,7 +37,8 @@ public class PCC_Controller {
         int paperId = Integer.parseInt(splitIds[0]);
         int pcmId = Integer.parseInt(splitIds[1]);
         assignPaper(paperId, pcmId);
-        return "assignPaper";
+        List<Paper> unassignedPapers = getUnassignedPapers();
+        return getAssignPaper(model);
     }
 
 
