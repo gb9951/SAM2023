@@ -1,8 +1,12 @@
 package mdd.team4.sam2023.controllers;
 
+import mdd.team4.sam2023.models.users.Admin;
+import mdd.team4.sam2023.models.users.Author;
 import mdd.team4.sam2023.models.users.PCC;
 import mdd.team4.sam2023.models.users.PCM;
 //import mdd.team4.sam2023.models.users.User;
+import mdd.team4.sam2023.repositories.users.AdminRepository;
+import mdd.team4.sam2023.repositories.users.AuthorRepository;
 import mdd.team4.sam2023.repositories.users.PCCRepository;
 import mdd.team4.sam2023.repositories.users.PCMRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +34,16 @@ public class WebSecurityConfig {
     private PCMRepository pcmRepository;
     @Autowired
     private PCCRepository pccRepository;
+    @Autowired
+    private AuthorRepository authorRepository;
+    @Autowired
+    private AdminRepository adminRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .antMatchers("/", "/assignPaper").permitAll()
+                        .antMatchers("/").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
@@ -50,27 +58,35 @@ public class WebSecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         List<UserDetails> userDetails = new ArrayList<>();
-        List<mdd.team4.sam2023.models.users.User> users = new ArrayList<>();
-        System.out.println(pcmRepository.findByEmail("pcm1@example.com"));
         Iterable<PCM> pcmIterable = pcmRepository.findAll();
         Iterable<PCC> pccIterable = pccRepository.findAll();
-        System.out.println("PCMS: " + pcmIterable);
+        Iterable<Admin> adminIterable = adminRepository.findAll();
+        Iterable<Author> authorIterable = authorRepository.findAll();
 
-        users.addAll(StreamSupport.stream(pcmIterable.spliterator(), false)
-                .collect(Collectors.toList()));
-        users.addAll(StreamSupport.stream(pccIterable.spliterator(), false)
-                .collect(Collectors.toList()));
-        System.out.println("Users: " + users);
 
+        userDetails.addAll(createDetailsByRole(StreamSupport.stream(pcmIterable.spliterator(), false)
+                .collect(Collectors.toList()), "PCM"));
+        userDetails.addAll(createDetailsByRole(StreamSupport.stream(pccIterable.spliterator(), false)
+                .collect(Collectors.toList()), "PCC"));
+        userDetails.addAll(createDetailsByRole(StreamSupport.stream(adminIterable.spliterator(), false)
+                .collect(Collectors.toList()), "Admin"));
+        userDetails.addAll(createDetailsByRole(StreamSupport.stream(authorIterable.spliterator(), false)
+                .collect(Collectors.toList()), "Author"));
+
+        return new InMemoryUserDetailsManager(userDetails);
+    }
+
+    private List<UserDetails> createDetailsByRole(List<mdd.team4.sam2023.models.users.User> users, String role) {
+        List<UserDetails> userDetails = new ArrayList<>();
         users.forEach(pcm -> {
             UserDetails user =
                     User.withDefaultPasswordEncoder()
                             .username(pcm.getEmail())
                             .password("password")
-                            .roles("PCM")
+                            .roles(role)
                             .build();
             userDetails.add(user);
         });
-        return new InMemoryUserDetailsManager(userDetails);
+        return userDetails;
     }
 }

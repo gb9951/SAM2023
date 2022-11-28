@@ -7,9 +7,13 @@
 <body>
 <p>Welcome to SAM2023</p>
 
-<form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+<p th:if="${not isLoggedIn}">Log in to SAM2023!</p>
+<p th:if="${isLoggedIn}" th:text="'You are logged in as ' + ${name} + ' as a(n) ' + ${role}"></p>
+
+<form th:if="${isLoggedIn}" th:action="@{/logout}" method="post">
     <input type="submit" value="Sign Out"/>
 </form>
-<a sec:authorize="isAnonymous()" href="/login">Login</a>
+<a th:each="link : ${roleLinks}" th:href="${link.key}" th:text="${link.value}"></a>
+<a th:if="${not isLoggedIn}" href="/login">Login</a>
 </body>
 </html>

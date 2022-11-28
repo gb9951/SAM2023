@@ -15,7 +15,6 @@ import mdd.team4.sam2023.repositories.users.PCMRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-@Component
 public class DataLoader implements CommandLineRunner {
     private AuthorRepository authorRepository;
     private PaperRepository paperRepository;
