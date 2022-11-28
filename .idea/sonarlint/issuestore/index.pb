@@ -1,6 +1,4 @@
 
-f
-6src/main/java/mdd/team4/sam2023/models/users/User.java,3\a\3a656bcb902179179ce7091d26397680761eda96
 g
 7src/main/java/mdd/team4/sam2023/models/users/Admin.java,4\b\4b9ccc5f571bffd19360bc3c14024cced9b71bba
 e
@@ -9,9 +7,15 @@ f
 6src/main/java/mdd/team4/sam2023/models/BaseEntity.java,2\0\2058d4bd2ede8c9e55ab4e3f686503ae4d3be883
 h
 8src/main/java/mdd/team4/sam2023/models/users/Author.java,2\4\241d4c454dc7ec582cf2ff3309c7a8c5b4611fb8
-e
-5src/main/java/mdd/team4/sam2023/models/users/PCM.java,e\b\eb53fb974b369d9fcacf00951ddf36049fe67188
-h
-8src/main/java/mdd/team4/sam2023/models/papers/Paper.java,0\a\0a1bf9807682290a335f4e1acb0b8ed850c197f9
 n
 >src/main/java/mdd/team4/sam2023/models/papers/PaperFormat.java,9\1\9142c9ddebfcb2a29d69397fef15d6fe52c95103
+n
+>src/main/java/mdd/team4/sam2023/models/templates/Template.java,f\a\faf201e42230ae13aff7f2fcb66f49a6b53cbb35
+w
+Gsrc/main/java/mdd/team4/sam2023/repositories/users/AdminRepository.java,c\1\c1856250806c0ecc12434ba786d0041c5eb83e92
+x
+Hsrc/main/java/mdd/team4/sam2023/repositories/users/AuthorRepository.java,b\f\bfb3fb951ceb799d5ebcbfd7e80cf859de593243
+u
+Esrc/main/java/mdd/team4/sam2023/repositories/users/PCCRepository.java,5\2\521da11f7eaa066e1b38f817f3f9848b30f26452
+u
+Esrc/main/java/mdd/team4/sam2023/repositories/users/PCMRepository.java,6\8\6882f3e674b1a7f160796ff5020f2c29d239d93f

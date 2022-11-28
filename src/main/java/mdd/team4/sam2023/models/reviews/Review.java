@@ -5,6 +5,7 @@ import mdd.team4.sam2023.models.BaseEntity;
 import mdd.team4.sam2023.models.papers.Paper;
 import mdd.team4.sam2023.models.users.PCM;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
@@ -55,5 +56,12 @@ public class Review extends BaseEntity {
 
     public void setPaper(Paper paper) {
         this.paper = paper;
+    }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "text='" + text + '\'' +
+                '}';
     }
 }
