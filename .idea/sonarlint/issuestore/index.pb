@@ -9,8 +9,6 @@ h
 8src/main/java/mdd/team4/sam2023/models/users/Author.java,2\4\241d4c454dc7ec582cf2ff3309c7a8c5b4611fb8
 n
 >src/main/java/mdd/team4/sam2023/models/papers/PaperFormat.java,9\1\9142c9ddebfcb2a29d69397fef15d6fe52c95103
-n
->src/main/java/mdd/team4/sam2023/models/templates/Template.java,f\a\faf201e42230ae13aff7f2fcb66f49a6b53cbb35
 w
 Gsrc/main/java/mdd/team4/sam2023/repositories/users/AdminRepository.java,c\1\c1856250806c0ecc12434ba786d0041c5eb83e92
 x
