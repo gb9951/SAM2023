@@ -3,12 +3,14 @@ package mdd.team4.sam2023.models.users;
 
 import mdd.team4.sam2023.models.BaseEntity;
 
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public class User extends BaseEntity {
 
     private String name;
+    @Column(nullable = false, unique = true)
     private String email;
 
     public User() {

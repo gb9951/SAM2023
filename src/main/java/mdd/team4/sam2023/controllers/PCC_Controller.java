@@ -26,6 +26,7 @@ public class PCC_Controller {
 
     @GetMapping("/assignPaper")
     public String getAssignPaper(Model model) {
+        System.out.println(pcmRepository.findByEmail("pcm1@example.com").getName());
         List<Paper> unassignedPapers = getUnassignedPapers();
         model.addAttribute("papers", unassignedPapers);
         return "assignPaper";
@@ -37,7 +38,6 @@ public class PCC_Controller {
         int paperId = Integer.parseInt(splitIds[0]);
         int pcmId = Integer.parseInt(splitIds[1]);
         assignPaper(paperId, pcmId);
-        List<Paper> unassignedPapers = getUnassignedPapers();
         return getAssignPaper(model);
     }
 
