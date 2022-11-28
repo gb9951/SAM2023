@@ -2,6 +2,7 @@ package mdd.team4.sam2023.models.reviews;
 
 
 import mdd.team4.sam2023.models.BaseEntity;
+import mdd.team4.sam2023.models.files.File;
 import mdd.team4.sam2023.models.papers.Paper;
 import mdd.team4.sam2023.models.users.PCM;
 
@@ -21,10 +22,20 @@ public class Review extends BaseEntity {
     @OneToOne
     Paper paper;
 
+    @OneToOne
+    File file;
+
     public Review(String text, PCM pcm, Paper paper) {
         this.text = text;
         this.pcm = pcm;
         this.paper = paper;
+    }
+
+    public Review(String text, PCM pcm, Paper paper, File file) {
+        this.text = text;
+        this.pcm = pcm;
+        this.paper = paper;
+        this.file = file;
     }
 
     public Review(String text) {
@@ -56,6 +67,14 @@ public class Review extends BaseEntity {
 
     public void setPaper(Paper paper) {
         this.paper = paper;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     @Override
