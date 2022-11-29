@@ -55,6 +55,8 @@ public class DataLoader implements CommandLineRunner {
 
         bob.getSubmittedPapers().add(bobPaper);
         bobPaper.getAuthors().add(bob);
+        alice.getSubmittedPapers().add(bobPaper);
+        bobPaper.getAuthors().add(alice);
         authorRepository.save(bob);
         paperRepository.save(bobPaper);
 
@@ -66,14 +68,19 @@ public class DataLoader implements CommandLineRunner {
 
         PCM pcm1 = new PCM("PCM1", "pcm1@example.com");
         PCM pcm2 = new PCM("PCM2", "pcm2@example.com");
+        PCM pcm3 = new PCM("PCM3", "pcm3@example.com");
 
         pcm1.getSelectedPapers().add(bobPaper);
         pcm2.getSelectedPapers().add(alicePaper);
         pcm2.getSelectedPapers().add(bobPaper);
+        pcm3.getSelectedPapers().add(bobPaper);
+        pcm3.getSelectedPapers().add(alicePaper);
 
         bobPaper.getSelectedBy().add(pcm1);
         bobPaper.getSelectedBy().add(pcm2);
+        bobPaper.getSelectedBy().add(pcm3);
         alicePaper.getSelectedBy().add(pcm1);
+        alicePaper.getSelectedBy().add(pcm3);
 
         pcm1.getAssignedPapers().add(bobPaper);
         pcm2.getAssignedPapers().add(bobPaper);
@@ -85,6 +92,7 @@ public class DataLoader implements CommandLineRunner {
 
         pcmRepository.save(pcm1);
         pcmRepository.save(pcm2);
+        pcmRepository.save(pcm3);
         paperRepository.save(bobPaper);
         paperRepository.save(alicePaper);
 
