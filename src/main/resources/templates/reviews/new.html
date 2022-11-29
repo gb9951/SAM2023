@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Review</title>
+</head>
+<body>
+<form th:object="${data}" id="add-review-form" method="post" th:href="@{/{pcmId}/reviews/{paperId}/new}" enctype="multipart/form-data" >
+    <h4 th:text="|Review for ${review.paper.getTitle()}|"></h4>
+    <h5 th:text="|Reviewed by ${review.pcm.getName()}|"></h5>
+  <input type="text" name="text" th:field="${data.text}">
+    <input type="file" name="file" th:field="${data.uploadedFile}">
+  <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

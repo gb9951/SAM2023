@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" xmlns:th="http://www.thymeleaf.org">
+    <title>Review Templates</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>Template ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Active</th>
+        <th>File</th>
+    </tr>
+    <tr th:each="template : ${templates}">
+        <th th:text="${template.id}"></th>
+        <th th:text="${template.name}"></th>
+        <th th:text="${template.description}"></th>
+        <th th:text="${template.active}"></th>
+    </tr>
+</table>
+
+</body>
+</html>

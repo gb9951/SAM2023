@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Review</title>
+</head>
+<body>
+<h3 th:text="|Review of ${review.paper.getTitle()}|"></h3>
+<h4 th:text="|Reviewed by ${review.pcm.getName()}|"></h4>
+<p th:text="${review.getText()}"></p>
+<a th:href="@{/{pcmId}/reviews/download/{fileId}(pcmId=${review.getPcm().getId()}, fileId=${review.getFile().getId()})}">Download Review</a>
+
+<a th:href="@{/{pcmId}/reviews/{reviewId}/delete(pcmId=${review.getPcm().getId()}, reviewId=${review.getId()})}">Delete Review</a>
+</body>
+</html>

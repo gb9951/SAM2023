@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reviews</title>
+</head>
+<body>
+
+<table>
+    <thead>
+    <tr>
+        <td>ID</td>
+        <td>Review Text</td>
+        <td>Paper Title</td>
+        <td>Reviewed By</td>
+    </tr>
+    </thead>
+    <tbody>
+        <tr th:each="review : ${reviews}">
+            <td th:text="${review.getId()}"></td>
+            <td th:text="${review.getText()}"></td>
+            <td th:text="${review.getPaper().getTitle()}"></td>
+            <td th:text="${review.getPcm().getName()}"></td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

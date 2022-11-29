@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <tr th:each="paper : ${assigned}">
+        <td th:text="${paper.getTitle()}"></td>
+        <td>
+            <span th:unless="${map.containsKey(paper.getId())}"><a th:href="@{/{pcmId}/reviews/{paperId}/new(pcmId=${pcm.getId()}, paperId=${paper.getId()})}">Add Review</a></span>
+            <span th:if="${map.containsKey(paper.getId())}">
+                <a th:href="@{/{pcmId}/reviews/{reviewId}(pcmId=${pcm.getId()}, reviewId=${map.get(paper.getId).getId()})}">View Review</a>
+            </span>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
