@@ -36,7 +36,7 @@ public class ReviewTemplateController {
     @GetMapping("")
     public String getAllReviewTemplates(Model model){
         List<ReviewTemplate> templates = templateRepository.findAll();
-        model.addAttribute(templates);
+        model.addAttribute("templates", templates);
         return "reviewTemplates/list";
     }
 
@@ -65,16 +65,49 @@ public class ReviewTemplateController {
         return "redirect:";
     }
 
-    @GetMapping("/download/{id}")
-    public ResponseEntity<byte[]> getFile(@PathVariable Integer id) {
-        File file = fileStorageService.getFile(id);
-
-        HttpHeaders header = new HttpHeaders();
-        header.setContentType(MediaType.valueOf(file.getType()));
-        header.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + file.getName());
-        ResponseEntity<byte[]> response = new ResponseEntity<>(file.getData(),header, HttpStatus.OK);
-        return response;
+    @GetMapping("{id}")
+    public String viewTemplate(Model model, @PathVariable String id){
+        ReviewTemplate template = templateRepository.findById(Integer.parseInt(id)).get();
+        model.addAttribute("template", template);
+        return "reviewTemplates/detail";
     }
+
+    @GetMapping("{id}/delete")
+    public String deleteTemplate(@PathVariable String id){
+        templateRepository.deleteById(Integer.parseInt(id));
+        return "redirect:/templates/reviews";
+    }
+
+    @GetMapping("{id}/edit")
+    public String initializeEditTemplate(@PathVariable String id, Model model){
+        ReviewTemplate template = templateRepository.findById(Integer.parseInt(id)).get();
+        ReviewTemplateRequest request = new ReviewTemplateRequest(template.getName(), template.getDescription(), template.isActive());
+        model.addAttribute("template", template);
+        model.addAttribute("request", request);
+        return "reviewTemplates/edit";
+    }
+
+    @PostMapping("{id}/edit")
+    public String editTemplate(ReviewTemplateRequest request ,@PathVariable String id){
+        ReviewTemplate template = templateRepository.findById(Integer.parseInt(id)).get();
+        template.setName(request.getName());
+        template.setActive(request.isActive());
+        template.setDescription(request.getDescription());
+        System.out.println(request.getUploadedFile());
+        if(request.getUploadedFile() !=null){
+            String filename = (new Date()).toString();
+            File file;
+            try {
+                file = fileStorageService.store(filename,request.getUploadedFile());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            template.setFile(file);
+        }
+        templateRepository.save(template);
+        return "redirect:/templates/reviews";
+    }
+
+
 
 }

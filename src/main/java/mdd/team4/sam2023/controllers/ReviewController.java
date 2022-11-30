@@ -4,9 +4,11 @@ import mdd.team4.sam2023.models.files.File;
 import mdd.team4.sam2023.models.papers.Paper;
 import mdd.team4.sam2023.models.reviews.Review;
 import mdd.team4.sam2023.models.reviews.ReviewRequest;
+import mdd.team4.sam2023.models.templates.ReviewTemplate;
 import mdd.team4.sam2023.models.users.PCM;
 import mdd.team4.sam2023.repositories.papers.PaperRepository;
 import mdd.team4.sam2023.repositories.reviews.ReviewRepository;
+import mdd.team4.sam2023.repositories.templates.ReviewTemplateRepository;
 import mdd.team4.sam2023.repositories.users.PCMRepository;
 import mdd.team4.sam2023.services.FileStorageService;
 import org.springframework.http.HttpHeaders;
@@ -15,11 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MimeType;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -31,28 +35,15 @@ public class ReviewController {
     private PaperRepository paperRepository;
     private FileStorageService fileStorageService;
 
-    public ReviewController(ReviewRepository reviewRepository, PCMRepository pcmRepository, PaperRepository paperRepository, FileStorageService fileStorageService) {
+    private ReviewTemplateRepository reviewTemplateRepository;
+
+
+    public ReviewController(ReviewRepository reviewRepository, PCMRepository pcmRepository, PaperRepository paperRepository, FileStorageService fileStorageService, ReviewTemplateRepository reviewTemplateRepository) {
         this.reviewRepository = reviewRepository;
         this.pcmRepository = pcmRepository;
         this.paperRepository = paperRepository;
         this.fileStorageService = fileStorageService;
-    }
-
-    @ModelAttribute("pcm")
-    public PCM findPCM(@PathVariable("pcmId") int pcmId) {
-        System.out.println(pcmId);
-        Optional<PCM> dbPcm = pcmRepository.findById(pcmId);
-        if(dbPcm.isPresent()){
-            PCM pcmValue = dbPcm.get();
-            return pcmValue;
-        } else {
-            return new PCM();
-        }
-    }
-
-    @InitBinder("pcm")
-    public void initOwnerBinder(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields("id");
+        this.reviewTemplateRepository = reviewTemplateRepository;
     }
 
     @GetMapping("")
@@ -63,6 +54,7 @@ public class ReviewController {
 
     @GetMapping("{paperId}/new")
     public String getCreateReviewForm(Model model, @PathVariable String paperId, @PathVariable String pcmId){
+        ReviewTemplate template = reviewTemplateRepository.findDistinctTopByActiveTrueOrderByIdDesc();
         Optional<PCM> dbPcm = pcmRepository.findById(Integer.valueOf(pcmId));
         PCM pcm;
         if(dbPcm.isPresent()){
@@ -86,12 +78,13 @@ public class ReviewController {
         review.setFile(file);
         model.addAttribute(review);
         model.addAttribute("data", data);
+        model.addAttribute("template", template);
         return "reviews/new";
     }
 
     @PostMapping("{paperId}/new")
     public String createReview(ReviewRequest reviewRequest, @PathVariable String paperId, @PathVariable String pcmId){
-
+        System.out.println("Hello test");
         Optional<PCM> dbPcm = pcmRepository.findById(Integer.valueOf(pcmId));
         PCM pcm;
         if(dbPcm.isPresent()){
@@ -108,7 +101,10 @@ public class ReviewController {
         }
 
         System.out.println(reviewRequest);
-        String filename = paper.getTitle().toLowerCase().strip().replace(" ", "_");
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String paperName = paper.getTitle().toLowerCase().strip().replace(" ", "_");
+        String pcmName = pcm.getName().toLowerCase().strip().replace(" ","_");
+        String filename = pcmName+"_"+paperName+timeStamp;
         File savedFile;
         try {
             savedFile = fileStorageService.store(filename, reviewRequest.getUploadedFile());
@@ -162,6 +158,52 @@ public class ReviewController {
         return "redirect:/"+pcmId+"/reviews/assigned_papers";
     }
 
+
+    @GetMapping("{reviewId}/edit")
+    public String editReviewForm(@PathVariable String pcmId, @PathVariable String reviewId, Model model){
+        Optional<Review> dbReview = reviewRepository.findById(Integer.valueOf(reviewId));
+        ReviewTemplate template = reviewTemplateRepository.findDistinctTopByActiveTrueOrderByIdDesc();
+        Review review;
+        if(dbReview.isPresent()){
+            review = dbReview.get();
+        } else {
+            return "reviews/error";
+        }
+        model.addAttribute("review", review);
+        ReviewRequest data = new ReviewRequest();
+        data.setText(review.getText());
+        model.addAttribute("data", data);
+        model.addAttribute("template", template);
+        return "reviews/edit";
+    }
+
+    @PostMapping("{reviewId}/edit")
+    public String editReview(ReviewRequest reviewRequest, @PathVariable String pcmId, @PathVariable String reviewId){
+        Optional<Review> dbReview = reviewRepository.findById(Integer.valueOf(reviewId));
+        Review review;
+        if(dbReview.isPresent()){
+            review = dbReview.get();
+        } else {
+            return "reviews/error";
+        }
+        review.setText(reviewRequest.getText());
+        if(reviewRequest.getUploadedFile() != null){
+            String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String paperName = review.getPaper().getTitle().toLowerCase().strip().replace(" ", "_");
+            String pcmName = review.getPcm().getName().toLowerCase().strip().replace(" ","_");
+            String filename = pcmName+"_"+paperName+timeStamp;
+            File savedFile;
+            try {
+                savedFile = fileStorageService.store(filename, reviewRequest.getUploadedFile());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            review.setFile(savedFile);
+        }
+        reviewRepository.save(review);
+        return "redirect:/"+review.getPcm().getId()+"/reviews/assigned_papers";
+    }
+
     @GetMapping("{reviewId}")
     public String getReview(@PathVariable String pcmId, @PathVariable String reviewId, Model model){
         Optional<Review> dbReview = reviewRepository.findById(Integer.valueOf(reviewId));
@@ -173,18 +215,6 @@ public class ReviewController {
         }
         model.addAttribute("review",review);
         return "reviews/detail";
-    }
-
-    @GetMapping("/download/{id}")
-    public ResponseEntity<byte[]> getFile(@PathVariable Integer id) {
-        File file = fileStorageService.getFile(id);
-
-        HttpHeaders header = new HttpHeaders();
-        header.setContentType(MediaType.valueOf(file.getType()));
-        header.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + file.getName());
-        ResponseEntity<byte[]> response = new ResponseEntity<>(file.getData(),header,HttpStatus.OK);
-        return response;
     }
 
 

@@ -21,6 +21,11 @@ public class ReviewTemplate extends Template{
     public ReviewTemplate() {
     }
 
+    public ReviewTemplate(String name, String description, boolean active) {
+        super(name, description);
+        this.active = active;
+    }
+
     public boolean isActive() {
         return active;
     }
