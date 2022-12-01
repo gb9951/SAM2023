@@ -47,6 +47,7 @@ public class LoginController {
         switch (role) {
             case "ROLE_PCM":
                 user = pcmRepository.findByEmail(authentication.getName());
+                linksMap.put(String.format("/%d/reviews/assigned_papers", user.getId()), "Assigned Papers");
                 break;
             case "ROLE_PCC":
                 user = pccRepository.findByEmail(authentication.getName());
@@ -57,6 +58,7 @@ public class LoginController {
                 break;
             case "ROLE_Admin":
                 user = adminRepository.findByEmail(authentication.getName());
+                linksMap.put("/templates/reviews", "View Review Templates");
                 break;
         }
         if(user != null) {

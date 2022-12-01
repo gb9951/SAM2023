@@ -15,18 +15,21 @@
 
 <main class="container">
     <div class="bg-light p-5 rounded">
-        <form th:object="${request}" id="add-review-form" method="post" th:href="@{/templates/reviews/new}" enctype="multipart/form-data">
-            <label for="name" class="form-label">Template Name</label>
-            <input type="text" name="name" th:field="${request.name}" id="name" class="form-control">
+        <div class="row">
+            <div class="col-md-9"></div>
+            <div class="col-md-3">
+                <a th:href="@{/download/{templateId}(templateId=${template.getFileId()})}" class="btn btn-secondary">Download Review Template</a>
+            </div>
+        </div>
+        <form th:object="${data}" id="edit-review-form" method="post" th:href="@{/{pcmId}/reviews/{reviewId}/edit(pcmId=${review.getPCMId()}, reviewId=${review.getId()})}" enctype="multipart/form-data">
+            <h4 th:text="|Review for ${review.getPaperTitle()}|"></h4>
+            <p th:text="|Reviewed by ${review.getPCMName()}|" class="lead"></p>
+
+            <label for="text" class="form-label">Review Text</label>
+            <input type="text" name="text" th:field="${data.text}" id="text" class="form-control">
             <br/>
-            <label for="description" class="form-label">Template Description</label>
-            <input type="text" name="description" th:field="${request.description}" id="description" class="form-control">
-            <br/>
-            <label for="active" class="form-label">Is Active?</label>
-            <input type="checkbox" name="active" th:field="${request.active}" id="active" class="form-check-input">
-            <br/>
-            <label for="file" class="form-label">Template File</label>
-            <input type="file" name="file" id="file" th:field="${request.uploadedFile}" class="form-control">
+            <label for="file" class="form-label">Review File</label>
+            <input type="file" name="file" id="file" th:field="${data.uploadedFile}" class="form-control">
             <br/>
             <input type="submit" value="Submit" class="btn btn-primary btn-lg">
         </form>

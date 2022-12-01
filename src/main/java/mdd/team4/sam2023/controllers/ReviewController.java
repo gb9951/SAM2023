@@ -2,81 +2,43 @@ package mdd.team4.sam2023.controllers;
 
 import mdd.team4.sam2023.models.files.File;
 import mdd.team4.sam2023.models.papers.Paper;
+import mdd.team4.sam2023.models.papers.PaperCollection;
 import mdd.team4.sam2023.models.reviews.Review;
+import mdd.team4.sam2023.models.reviews.ReviewCollection;
 import mdd.team4.sam2023.models.reviews.ReviewRequest;
+import mdd.team4.sam2023.models.templates.ReviewTemplate;
 import mdd.team4.sam2023.models.users.PCM;
-import mdd.team4.sam2023.repositories.papers.PaperRepository;
-import mdd.team4.sam2023.repositories.reviews.ReviewRepository;
-import mdd.team4.sam2023.repositories.users.PCMRepository;
-import mdd.team4.sam2023.services.FileStorageService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import mdd.team4.sam2023.models.users.UserCollection;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("{pcmId}/reviews")
 public class ReviewController {
-    private ReviewRepository reviewRepository;
-    private PCMRepository pcmRepository;
+    private final ReviewCollection reviewCollection;
+    private final UserCollection userCollection;
+    private final PaperCollection paperCollection;
 
-    private PaperRepository paperRepository;
-    private FileStorageService fileStorageService;
-
-    public ReviewController(ReviewRepository reviewRepository, PCMRepository pcmRepository, PaperRepository paperRepository, FileStorageService fileStorageService) {
-        this.reviewRepository = reviewRepository;
-        this.pcmRepository = pcmRepository;
-        this.paperRepository = paperRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    @ModelAttribute("pcm")
-    public PCM findPCM(@PathVariable("pcmId") int pcmId) {
-        System.out.println(pcmId);
-        Optional<PCM> dbPcm = pcmRepository.findById(pcmId);
-        if(dbPcm.isPresent()){
-            PCM pcmValue = dbPcm.get();
-            return pcmValue;
-        } else {
-            return new PCM();
-        }
-    }
-
-    @InitBinder("pcm")
-    public void initOwnerBinder(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields("id");
-    }
-
-    @GetMapping("")
-    public String getAllReviews(Model model){
-        model.addAttribute("reviews",reviewRepository.findAll());
-        return "reviews/list";
+    public ReviewController(ReviewCollection reviewCollection, UserCollection userCollection, PaperCollection paperCollection) {
+        this.reviewCollection = reviewCollection;
+        this.userCollection = userCollection;
+        this.paperCollection = paperCollection;
     }
 
     @GetMapping("{paperId}/new")
-    public String getCreateReviewForm(Model model, @PathVariable String paperId, @PathVariable String pcmId){
-        Optional<PCM> dbPcm = pcmRepository.findById(Integer.valueOf(pcmId));
-        PCM pcm;
-        if(dbPcm.isPresent()){
-            pcm = dbPcm.get();
-        } else {
-            return "reviews/error";
-        }
-        Optional<Paper> dbPaper = paperRepository.findById(Integer.valueOf(paperId));
-        Paper paper;
-        if(dbPaper.isPresent()){
-            paper=dbPaper.get();
-        } else {
-            return "reviews/error";
-        }
+    public String getCreateReviewForm(Model model, @PathVariable String paperId, @PathVariable String pcmId) {
+        ReviewTemplate template = reviewCollection.getReviewTemplate();
+        PCM pcm = userCollection.findPCMByID(pcmId);
+        Paper paper = paperCollection.findPaperByID(paperId);
 
         Review review = new Review();
         ReviewRequest data = new ReviewRequest();
@@ -86,107 +48,85 @@ public class ReviewController {
         review.setFile(file);
         model.addAttribute(review);
         model.addAttribute("data", data);
+        model.addAttribute("template", template);
         return "reviews/new";
     }
 
     @PostMapping("{paperId}/new")
-    public String createReview(ReviewRequest reviewRequest, @PathVariable String paperId, @PathVariable String pcmId){
-
-        Optional<PCM> dbPcm = pcmRepository.findById(Integer.valueOf(pcmId));
-        PCM pcm;
-        if(dbPcm.isPresent()){
-            pcm = dbPcm.get();
-        } else {
-            return "reviews/error";
-        }
-        Optional<Paper> dbPaper = paperRepository.findById(Integer.valueOf(paperId));
-        Paper paper;
-        if(dbPaper.isPresent()){
-            paper=dbPaper.get();
-        } else {
-            return "reviews/error";
-        }
-
-        System.out.println(reviewRequest);
-        String filename = paper.getTitle().toLowerCase().strip().replace(" ", "_");
+    public String createReview(ReviewRequest reviewRequest, @PathVariable String paperId, @PathVariable String pcmId) {
+        PCM pcm = userCollection.findPCMByID(pcmId);
+        Paper paper = paperCollection.findPaperByID(paperId);
+        Review review = new Review(reviewRequest.getText(), pcm, paper);
         File savedFile;
         try {
-            savedFile = fileStorageService.store(filename, reviewRequest.getUploadedFile());
+            savedFile = reviewCollection.saveReviewFile(review, reviewRequest.getUploadedFile());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Review review = new Review(reviewRequest.getText(), pcm, paper, savedFile);
-        reviewRepository.save(review);
-        return "redirect:/"+pcmId+"/reviews/assigned_papers";
+        review.setFile(savedFile);
+        reviewCollection.saveReview(review);
+        return "redirect:/" + pcmId + "/reviews/assigned_papers";
     }
 
     @GetMapping("/assigned_papers")
-    public String getAssignedPapers(Model model, @PathVariable String pcmId){
-        Optional<PCM> dbPcm = pcmRepository.findById(Integer.valueOf(pcmId));
-        PCM pcm;
-        if(dbPcm.isPresent()){
-            pcm = dbPcm.get();
-        } else {
-            return "reviews/error";
-        }
-        List<Review> reviews = reviewRepository.findAllByPcmId(pcm.getId());
+    public String getAssignedPapers(Model model, @PathVariable String pcmId) {
+        PCM pcm = userCollection.findPCMByID(pcmId);
+        List<Review> reviews = reviewCollection.findAllByPcmId(pcm.getId());
         Set<Paper> assignedPapers = pcm.getAssignedPapers();
-        List<Integer> reviewedPaperIds = new ArrayList<>();
-        for (Review review :
-                reviews) {
-            reviewedPaperIds.add(review.getPaper().getId());
-        }
         HashMap<Integer, Review> paperReviewMap = new HashMap<>();
         for (Review review : reviews) {
-            Review reviewForPaper = reviewRepository.findDistinctFirstByPaperId(review.getPaper().getId());
-            paperReviewMap.put(review.getPaper().getId(), reviewForPaper);
+            Review reviewForPaper = reviewCollection.getReviewForPaperId(review.getReviewPaperId());
+            paperReviewMap.put(review.getReviewPaperId(), reviewForPaper);
         }
         model.addAttribute("reviews", reviews);
         model.addAttribute("assigned", assignedPapers.toArray());
-        model.addAttribute("reviewedPaperIds", reviewedPaperIds);
         model.addAttribute("pcm", pcm);
         model.addAttribute("map", paperReviewMap);
         return "reviews/assigned_papers";
     }
 
     @GetMapping("{reviewId}/delete")
-    public String deleteReview(@PathVariable String pcmId, @PathVariable String reviewId){
-        Optional<Review> dbReview = reviewRepository.findById(Integer.valueOf(reviewId));
-        Review review;
-        if(dbReview.isPresent()){
-            review = dbReview.get();
-        } else {
-            return "reviews/error";
+    public String deleteReview(@PathVariable String pcmId, @PathVariable String reviewId) {
+        reviewCollection.deleteReviewById(reviewId);
+        return "redirect:/" + pcmId + "/reviews/assigned_papers";
+    }
+
+
+    @GetMapping("{reviewId}/edit")
+    public String editReviewForm(@PathVariable String pcmId, @PathVariable String reviewId, Model model) {
+        Review review = reviewCollection.findReviewById(reviewId);
+        ReviewTemplate template = reviewCollection.getReviewTemplate();
+        model.addAttribute("review", review);
+        ReviewRequest data = new ReviewRequest();
+        data.setText(review.getText());
+        model.addAttribute("data", data);
+        model.addAttribute("template", template);
+        return "reviews/edit";
+    }
+
+    @PostMapping("{reviewId}/edit")
+    public String editReview(ReviewRequest reviewRequest, @PathVariable String pcmId, @PathVariable String reviewId) {
+        Review review = reviewCollection.findReviewById(reviewId);
+        review.setText(reviewRequest.getText());
+        if (reviewRequest.getUploadedFile() != null) {
+            File savedFile;
+            try {
+                savedFile = reviewCollection.saveReviewFile(review, reviewRequest.getUploadedFile());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            review.setFile(savedFile);
         }
-        reviewRepository.deleteById(Integer.valueOf(reviewId));
-        return "redirect:/"+pcmId+"/reviews/assigned_papers";
+        reviewCollection.saveReview(review);
+        return "redirect:/" + review.getPcm().getId() + "/reviews/assigned_papers";
     }
 
     @GetMapping("{reviewId}")
-    public String getReview(@PathVariable String pcmId, @PathVariable String reviewId, Model model){
-        Optional<Review> dbReview = reviewRepository.findById(Integer.valueOf(reviewId));
-        Review review;
-        if(dbReview.isPresent()){
-            review = dbReview.get();
-        } else {
-            return "reviews/error";
-        }
-        model.addAttribute("review",review);
+    public String getReview(@PathVariable String pcmId, @PathVariable String reviewId, Model model) {
+        Review review = reviewCollection.findReviewById(reviewId);
+        model.addAttribute("review", review);
         return "reviews/detail";
     }
-
-    @GetMapping("/download/{id}")
-    public ResponseEntity<byte[]> getFile(@PathVariable Integer id) {
-        File file = fileStorageService.getFile(id);
-
-        HttpHeaders header = new HttpHeaders();
-        header.setContentType(MediaType.valueOf(file.getType()));
-        header.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + file.getName());
-        ResponseEntity<byte[]> response = new ResponseEntity<>(file.getData(),header,HttpStatus.OK);
-        return response;
-    }
-
 
 
 }

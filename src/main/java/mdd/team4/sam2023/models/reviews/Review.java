@@ -6,9 +6,10 @@ import mdd.team4.sam2023.models.files.File;
 import mdd.team4.sam2023.models.papers.Paper;
 import mdd.team4.sam2023.models.users.PCM;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Entity
 public class Review extends BaseEntity {
@@ -76,6 +77,38 @@ public class Review extends BaseEntity {
     public void setFile(File file) {
         this.file = file;
     }
+
+    public int getReviewPaperId(){
+        return getPaper().getId();
+    }
+
+    public String getPaperTitle(){
+        return getPaper().getTitle();
+    }
+
+    public int getPCMId(){
+        return getPcm().getId();
+    }
+
+    public String getPCMName(){
+        return getPcm().getName();
+    }
+
+    public int getFileId(){
+        return getFile().getId();
+    }
+
+    public String getReviewFileName(){
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String paperName = formatFileName(getPaperTitle());
+        String pcmName = formatFileName(getPCMName());
+        return pcmName+"_"+paperName+timeStamp;
+    }
+
+    private String formatFileName(String text){
+        return text.toLowerCase().strip().replace(" ", "_");
+    }
+
 
     @Override
     public String toString() {

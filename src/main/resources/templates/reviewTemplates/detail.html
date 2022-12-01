@@ -15,18 +15,13 @@
 
 <main class="container">
   <div class="bg-light p-5 rounded">
-    <div th:if="${param.error}" class="lead">
-      Invalid username and password.
-    </div>
-    <div th:if="${param.logout}" class="lead">
-      You have been logged out.
-    </div>
-    <div class="my-3"></div>
-    <form th:action="@{/login}" method="post">
-      <div><label class="form-label"> User Name : <input type="text" name="username" class="form-control"/> </label></div>
-      <div><label class="form-label"> Password: <input type="password" name="password" class="form-control"/> </label></div>
-      <div><input type="submit" value="Sign In" class="btn btn-primary"/></div>
-    </form>
+    <h3 th:text="${template.getName()}"></h3>
+
+    <p th:text="${template.getDescription()}"></p>
+    <p>Template Active: <span th:text="${template.isActive()}"></span></p>
+    <a th:href="@{/download/{fileId}(fileId=${template.getFile().getId()})}" class="btn btn-primary">Download Template</a>
+    <a th:href="@{/templates/reviews/{templateId}/edit(templateId=${template.getId()})}" class="btn btn-primary">Edit Template</a>
+    <a th:href="@{/templates/reviews/{templateId}/delete(templateId=${template.getId()})}" class="btn btn-primary">Delete Template</a>
   </div>
 </main>
 
