@@ -18,12 +18,12 @@
         <div class="row">
             <div class="col-md-9"></div>
             <div class="col-md-3">
-                <a th:href="@{/download/{templateId}(templateId=${template.getFile().getId()})}" class="btn btn-secondary">Download Review Template</a>
+                <a th:href="@{/download/{templateId}(templateId=${template.getFileId()})}" class="btn btn-secondary">Download Review Template</a>
             </div>
         </div>
-        <form th:object="${data}" id="edit-review-form" method="post" th:href="@{/{pcmId}/reviews/{reviewId}/edit(pcmId=${review.getPcm().getId()}, reviewId=${review.getId()})}" enctype="multipart/form-data">
-            <h4 th:text="|Review for ${review.paper.getTitle()}|"></h4>
-            <p th:text="|Reviewed by ${review.pcm.getName()}|" class="lead"></p>
+        <form th:object="${data}" id="edit-review-form" method="post" th:href="@{/{pcmId}/reviews/{reviewId}/edit(pcmId=${review.getPCMId()}, reviewId=${review.getId()})}" enctype="multipart/form-data">
+            <h4 th:text="|Review for ${review.getPaperTitle()}|"></h4>
+            <p th:text="|Reviewed by ${review.getPCMName()}|" class="lead"></p>
 
             <label for="text" class="form-label">Review Text</label>
             <input type="text" name="text" th:field="${data.text}" id="text" class="form-control">

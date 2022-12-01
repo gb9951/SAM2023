@@ -4,6 +4,8 @@ import mdd.team4.sam2023.models.files.File;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Entity
 public class ReviewTemplate extends Template{
@@ -40,5 +42,14 @@ public class ReviewTemplate extends Template{
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public String getTemplateFileName(){
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        return "review_template_"+timeStamp;
+    }
+
+    public int getFileId(){
+        return getFile().getId();
     }
 }

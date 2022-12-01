@@ -15,12 +15,12 @@
 
 <main class="container">
     <div class="bg-light p-5 rounded">
-        <h3 th:text="|Review of ${review.paper.getTitle()}|"></h3>
-        <p th:text="|Reviewed by ${review.pcm.getName()}|" class="lead"></p>
+        <h3 th:text="|Review of ${review.getPaperTitle()}|"></h3>
+        <p th:text="|Reviewed by ${review.getPCMName()}|" class="lead"></p>
         <p th:text="${review.getText()}"></p>
-        <a th:href="@{/download/{fileId}(fileId=${review.getFile().getId()})}" class="btn btn-primary">Download Review</a>
-        <a th:href="@{/{pcmId}/reviews/{reviewId}/edit(pcmId=${review.getPcm().getId()}, reviewId=${review.getId()})}" class="btn btn-primary">Edit Review</a>
-        <a th:href="@{/{pcmId}/reviews/{reviewId}/delete(pcmId=${review.getPcm().getId()}, reviewId=${review.getId()})}" class="btn btn-primary">Delete Review</a>
+        <a th:href="@{/download/{fileId}(fileId=${review.getFileId()})}" class="btn btn-primary">Download Review</a>
+        <a th:href="@{/{pcmId}/reviews/{reviewId}/edit(pcmId=${review.getPCMId()}, reviewId=${review.getId()})}" class="btn btn-primary">Edit Review</a>
+        <a th:href="@{/{pcmId}/reviews/{reviewId}/delete(pcmId=${review.getPCMId()}, reviewId=${review.getId()})}" class="btn btn-primary">Delete Review</a>
     </div>
 </main>
 

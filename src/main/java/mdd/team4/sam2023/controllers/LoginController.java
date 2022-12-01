@@ -58,6 +58,7 @@ public class LoginController {
                 break;
             case "ROLE_Admin":
                 user = adminRepository.findByEmail(authentication.getName());
+                linksMap.put("/templates/reviews", "View Review Templates");
                 break;
         }
         if(user != null) {
